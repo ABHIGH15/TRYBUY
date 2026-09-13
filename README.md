@@ -18,6 +18,32 @@ Modern shopping is scattered. We save items to wishlists, leave tabs open, or se
 
 Existing tools are optimized for **saving products**. TRYBUY treats the **unresolved purchase decision** as the core problem. The user owns the intent; TRYBUY owns the decision memory and workflow.
 
+---
+
+## 📸 Product Walkthrough
+
+*(Note to viewer: TRYBUY's capture extension is currently in private developer preview. Below is the end-to-end workflow.)*
+
+<div align="center">
+
+### 1. Frictionless Capture
+*The app intelligently intercepts protected URLs and routes them to the Chrome extension for strict, identity-verified data extraction.*
+<img src="./docs/assets/01-capture.png" alt="Capture Workflow" width="700"/>
+
+### 2. The Comparison Workspace
+*Decisions are grouped logically. No AI recommendations or forced rankings—the user compares side-by-side and chooses the winner.*
+<img src="./docs/assets/02-compare.png" alt="Comparison Workspace" width="700"/>
+
+### 3. Price Watch
+*Storing the exact price at capture alongside a target price, keeping the intent explicitly separated from active comparisons.*
+<img src="./docs/assets/03-price.png" alt="Price Watch" width="700"/>
+
+### 4. The Home Dashboard
+*Organized purely by decision state: Needs Attention, Waiting, and Recently Resolved.*
+<img src="./docs/assets/04-home.png" alt="Home Dashboard" width="700"/>
+
+</div>
+
 ## ⚙️ How It Works
 
 ```mermaid
