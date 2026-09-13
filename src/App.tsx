@@ -1,28 +1,24 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { Feed } from './components/Feed';
-import { TryBuyMemory } from './components/TryBuyMemory';
-import { PrototypeLab } from './components/PrototypeLab';
-import { ProductDetail } from './components/ProductDetail';
-import { Bag } from './components/Bag';
-import { Profile } from './components/Profile';
-import { BottomNav } from './components/BottomNav';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toast } from './components/Toast';
+import { CapturePage } from './pages/CapturePage';
+import { HomePage } from './pages/HomePage';
+import { HistoryPage } from './pages/HistoryPage';
+import { ComparisonPage } from './pages/ComparisonPage';
+import { PriceDetailPage } from './pages/PriceDetailPage';
+import { Navigation } from './components/Navigation';
 
 function AppContent() {
-  const location = useLocation();
-  const isPdp = location.pathname.startsWith('/product/') || location.pathname === '/bag';
-
   return (
     <div className="bg-white max-w-md mx-auto min-h-screen relative shadow-2xl overflow-x-hidden">
       <Routes>
-        <Route path="/" element={<Feed />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
-        <Route path="/memory" element={<TryBuyMemory />} />
-        <Route path="/bag" element={<Bag />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/internal-lab" element={<PrototypeLab />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/capture" element={<CapturePage />} />
+        <Route path="/history" element={<HistoryPage />} />
+        <Route path="/comparison/:setId" element={<ComparisonPage />} />
+        <Route path="/price/:decisionId" element={<PriceDetailPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      {!isPdp && <BottomNav />}
+      <Navigation />
       <Toast />
     </div>
   );

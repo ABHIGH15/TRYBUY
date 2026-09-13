@@ -1,57 +1,39 @@
-import { useExperimentStore } from "./store/experimentStore";
-export type AnalyticsEventName = 
-  | 'product_viewed'
-  | 'save_clicked'
-  | 'intent_prompt_shown'
-  | 'intent_selected'
-  | 'intent_skipped'
-  | 'memory_viewed'
-  | 'saved_product_revisited'
-  | 'recommendation_clicked'
-  | 'purchase_simulated'
-  | 'reengagement_viewed'
-  | 'reengagement_clicked'
-  | 'bag_item_added'
-  | 'bag_item_removed'
-  | 'bag_quantity_changed'
-  | 'checkout_attempted'
-  | 'bag_viewed'
-  | 'profile_viewed'
-  | 'prototype_data_reset';
+import type { ExtractionStatus, Reason, ResolutionType } from './types/domain';
 
-export interface AnalyticsEvent {
+export type AnalyticsEventPayloads = {
+  decision_saved: { reason: Reason; source_domain: string; extraction_status: ExtractionStatus };
+  capture_extraction_result: { domain: string; result: 'auto' | 'partial' | 'failed' };
+  comparison_set_created: { set_id: string; item_count_after: number };
+  comparison_item_added: { set_id: string; item_count_after: number };
+  price_recheck_triggered: { decision_id: string; trigger: 'manual' | 'auto' };
+  decision_resolved: { decision_id: string; resolution_type: ResolutionType; reason: Reason; days_since_saved: number };
+  decision_dormant: { decision_id: string; reason: Reason; days_since_saved: number };
+  home_opened: { open_decision_count: number; active_trigger_count: number };
+};
+
+export type AnalyticsEventName = keyof AnalyticsEventPayloads;
+
+export interface AnalyticsEvent<T extends AnalyticsEventName> {
   id: string;
-  eventName: AnalyticsEventName;
+  eventName: T;
   timestamp: number;
-  properties?: Record<string, any>;
-  variant: 'control' | 'treatment';
+  properties: AnalyticsEventPayloads[T];
 }
 
 class Analytics {
-  private getVariant(): 'control' | 'treatment' {
-    try {
-      return useExperimentStore.getState().variant;
-    } catch (e) {
-      return 'control';
-    }
-  }
-
-  track(eventName: AnalyticsEventName, properties?: Record<string, any>) {
-    const event: AnalyticsEvent = {
+  track<T extends AnalyticsEventName>(eventName: T, properties: AnalyticsEventPayloads[T]) {
+    const event: AnalyticsEvent<T> = {
       id: crypto.randomUUID(),
       eventName,
       timestamp: Date.now(),
       properties,
-      variant: this.getVariant(),
     };
 
-    // Log to console for prototype visibility
     console.log(`[Analytics] ${eventName}`, event);
 
-    // Persist to local storage for demo purposes
     try {
       const stored = localStorage.getItem('trybuy-analytics-events');
-      const events: AnalyticsEvent[] = stored ? JSON.parse(stored) : [];
+      const events: any[] = stored ? JSON.parse(stored) : [];
       events.push(event);
       localStorage.setItem('trybuy-analytics-events', JSON.stringify(events));
     } catch (e) {
@@ -59,7 +41,7 @@ class Analytics {
     }
   }
 
-  getEvents(): AnalyticsEvent[] {
+  getEvents(): any[] {
     try {
       const stored = localStorage.getItem('trybuy-analytics-events');
       return stored ? JSON.parse(stored) : [];
