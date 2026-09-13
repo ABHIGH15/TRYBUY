@@ -5,7 +5,8 @@ import { ArrowLeft } from 'lucide-react';
 
 export function HistoryPage() {
   const navigate = useNavigate();
-  const decisions = useDecisionStore(s => Object.values(s.decisions));
+  const decisionsDict = useDecisionStore(s => s.decisions);
+  const decisions = Object.values(decisionsDict);
   
   const history = decisions
     .filter(d => d.state !== 'active')

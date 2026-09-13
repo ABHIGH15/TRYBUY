@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Link, 
   Image as ImageIcon, 
@@ -18,13 +18,16 @@ import { analytics } from '../analytics';
 
 export function CapturePage() {
   const navigate = useNavigate();
-  const { addDecision, comparisonSets, createComparisonSet, addToComparisonSet } = useDecisionStore();
+  const addDecision = useDecisionStore(s => s.addDecision);
+  const comparisonSets = useDecisionStore(s => s.comparisonSets);
+  const createComparisonSet = useDecisionStore(s => s.createComparisonSet);
+  const addToComparisonSet = useDecisionStore(s => s.addToComparisonSet);
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   const [url, setUrl] = useState('');
-  const [step, setStep] = useState<'input' | 'extracting' | 'editing'>('input');
+  const [step, setStep] = useState<'input' | 'extracting' | 'extension-prompt' | 'editing'>('input');
   const [error, setError] = useState<string | null>(null);
 
   // Extracted/Edited Metadata
@@ -46,6 +49,47 @@ export function CapturePage() {
   const [selectedSetId, setSelectedSetId] = useState<string>('');
   const [newSetName, setNewSetName] = useState('');
   const [isCreatingSet, setIsCreatingSet] = useState(false);
+
+  const [searchParams] = useSearchParams();
+
+  React.useEffect(() => {
+    const payloadEncoded = searchParams.get('payload');
+    if (payloadEncoded) {
+      try {
+        const decodedStr = decodeURIComponent(escape(atob(payloadEncoded)));
+        const data = JSON.parse(decodedStr);
+        
+        if (data.source_url && typeof data.source_url === 'string') {
+          // Strictly validate URL
+          new URL(data.source_url);
+          
+          setUrl(data.source_url);
+          setTitle(typeof data.title === 'string' ? data.title.slice(0, 500) : '');
+          setImageUrl(typeof data.image === 'string' ? data.image.slice(0, 2000) : '');
+          setMerchant(typeof data.merchant === 'string' ? data.merchant.slice(0, 100) : '');
+          setCurrency(typeof data.currency === 'string' ? data.currency.slice(0, 3) : '');
+          
+          if (typeof data.price === 'number' && !isNaN(data.price)) {
+            setPrice(data.price.toString());
+          }
+
+          const status = data.extraction_status;
+          setExtractionStatus(['auto', 'partial', 'manual'].includes(status) ? status : 'manual');
+          
+          try {
+            setSourceDomain(new URL(data.source_url).hostname.replace('www.', ''));
+          } catch {
+            setSourceDomain('unknown');
+          }
+
+          setStep('editing');
+        }
+      } catch (err) {
+        // Silently ignore malformed payloads and fall back to manual input step
+        console.warn('Invalid extension payload');
+      }
+    }
+  }, [searchParams]);
 
   const handleFetch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +113,18 @@ export function CapturePage() {
     }
 
     setUrl(validUrl);
+    
+    // Intercept Protected Tier-1 Domains
+    try {
+      const domain = new URL(validUrl).hostname.replace('www.', '');
+      if (domain === 'myntra.com' || domain === 'amazon.in' || domain === 'amazon.com') {
+        setSourceDomain(domain);
+        setExtractionStatus('manual'); // technically a fallback state if they skip
+        setStep('extension-prompt');
+        return;
+      }
+    } catch (err) {}
+
     setStep('extracting');
 
     if (abortControllerRef.current) {
@@ -201,8 +257,8 @@ export function CapturePage() {
 
       <main className="px-6 space-y-8">
         
-        {/* Step 1: URL Input */}
-        <section className={`transition-opacity duration-300 ${step === 'input' ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+        {/* Step 1: URL Input & Prompts */}
+        <section className={`transition-opacity duration-300 ${['input', 'extension-prompt'].includes(step) ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
           <form onSubmit={handleFetch} className="space-y-3">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -237,6 +293,39 @@ export function CapturePage() {
                 Reading product page...
               </div>
             )}
+            {step === 'extension-prompt' && (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-5 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm text-center">
+                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto">
+                  <Store className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900 capitalize">{sourceDomain}</h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    This store requires the TRYBUY extension to capture accurately.
+                  </p>
+                </div>
+                <div className="text-sm text-gray-700 text-left bg-gray-50 p-4 rounded-xl space-y-2">
+                  <p className="font-medium flex items-center gap-2"><span className="w-5 h-5 flex items-center justify-center bg-gray-200 rounded-full text-xs">1</span> Open the product</p>
+                  <p className="font-medium flex items-center gap-2"><span className="w-5 h-5 flex items-center justify-center bg-gray-200 rounded-full text-xs">2</span> Click the TRYBUY extension</p>
+                </div>
+                <div className="pt-2 space-y-3">
+                  <button
+                    type="button" 
+                    onClick={() => window.open(url, '_blank')}
+                    className="w-full bg-black text-white py-3 rounded-xl font-medium shadow-sm hover:bg-gray-800 transition-colors flex justify-center items-center gap-2"
+                  >
+                    Open Product to Capture <ArrowRight className="w-4 h-4" />
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setStep('editing')}
+                    className="w-full bg-white text-gray-600 border border-gray-200 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                  >
+                    Or enter details manually
+                  </button>
+                </div>
+              </div>
+            )}
           </form>
         </section>
 
@@ -244,15 +333,23 @@ export function CapturePage() {
         {step === 'editing' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
             
+            {extractionStatus === 'manual' && (
+              <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 space-y-1">
+                <p className="text-sm font-semibold text-orange-900">We couldn't read this product automatically.</p>
+                <p className="text-xs text-orange-700">That's okay — you can enter the details manually below and still save it to your workspace.</p>
+              </div>
+            )}
+            
+            {extractionStatus === 'partial' && (
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-1">
+                <p className="text-sm font-semibold text-blue-900">We couldn't read everything automatically.</p>
+                <p className="text-xs text-blue-700">Please fill in any missing details below to save it to your workspace.</p>
+              </div>
+            )}
+
             <section className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Product Details</h2>
-                {extractionStatus === 'manual' && (
-                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">Manual Entry</span>
-                )}
-                {extractionStatus === 'partial' && (
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">Partial Data</span>
-                )}
               </div>
               
               <div className="space-y-3">

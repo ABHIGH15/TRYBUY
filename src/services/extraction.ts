@@ -62,36 +62,72 @@ export async function extractMetadata(url: string, signal?: AbortSignal): Promis
 
     const title = getMeta('og:title') || getMeta('twitter:title') || doc.title;
     const image_url = getMeta('og:image') || getMeta('twitter:image');
-    
-    // Price scraping is notoriously flaky without a headless browser/JSON-LD parsing,
-    // but we attempt basic OpenGraph extraction.
-    const priceStr = getMeta('product:price:amount') || getMeta('og:price:amount');
     let price: number | undefined = undefined;
+    let currency = getMeta('product:price:currency') || getMeta('og:price:currency');
+    const siteName = getMeta('og:site_name') || domain;
+
+    // 1. JSON-LD Priority Extraction
+    let finalTitle = title;
+    let finalImage = image_url;
     
-    if (priceStr) {
-      // Clean up currency symbols/commas if any exist
-      const cleanPrice = priceStr.replace(/[^0-9.]/g, '');
-      const parsed = parseFloat(cleanPrice);
-      if (!isNaN(parsed)) {
-        price = parsed;
+    try {
+      const matches = data.contents.match(/<script type="application\/ld\+json">(.*?)<\/script>/gis);
+      if (matches) {
+        for (const match of matches) {
+          const inner = match.replace(/<script[^>]*>|<\/script>/gi, '').trim();
+          const parsed = JSON.parse(inner);
+          const items = Array.isArray(parsed) ? parsed : [parsed];
+          for (const item of items) {
+            if (item['@type'] === 'Product' || (Array.isArray(item['@graph']) && item['@graph'].some((g: any) => g['@type'] === 'Product'))) {
+              const productNode = item['@type'] === 'Product' ? item : item['@graph'].find((g: any) => g['@type'] === 'Product');
+              
+              if (productNode.name && !finalTitle) finalTitle = productNode.name;
+              if (productNode.image) {
+                finalImage = Array.isArray(productNode.image) ? productNode.image[0] : productNode.image;
+              }
+              
+              if (productNode.offers) {
+                const offer = Array.isArray(productNode.offers) ? productNode.offers[0] : productNode.offers;
+                if (offer.price) {
+                  const p = parseFloat(offer.price);
+                  if (!isNaN(p)) price = p;
+                }
+                if (offer.priceCurrency && !currency) {
+                  currency = offer.priceCurrency;
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Ignore JSON-LD parsing errors
+    }
+
+    // 2. OpenGraph/Meta fallback for price if JSON-LD missed it
+    if (price === undefined) {
+      const priceStr = getMeta('product:price:amount') || getMeta('og:price:amount');
+      if (priceStr) {
+        const cleanPrice = priceStr.replace(/[^0-9.]/g, '');
+        const parsed = parseFloat(cleanPrice);
+        if (!isNaN(parsed)) {
+          price = parsed;
+        }
       }
     }
 
-    const currency = getMeta('product:price:currency') || getMeta('og:price:currency');
-    const siteName = getMeta('og:site_name') || domain;
-
-    if (title && image_url && price !== undefined) {
-      return { title, image_url, merchant: siteName, price, currency, status: 'auto', domain };
-    } else if (title) {
-      return { title, image_url, merchant: siteName, price, currency, status: 'partial', domain };
+    if (finalTitle && finalImage && price !== undefined) {
+      return { title: finalTitle, image_url: finalImage, merchant: siteName, price, currency, status: 'auto', domain };
+    } else if (finalTitle) {
+      return { title: finalTitle, image_url: finalImage, merchant: siteName, price, currency, status: 'partial', domain };
     } else {
       return { status: 'manual', domain };
     }
   } catch (error: any) {
-    if (error.name === 'AbortError') {
-      throw error; // Let the caller handle cancellation
+    if (error.name === 'AbortError' && signal && signal.aborted) {
+      throw error; // Let the caller handle true cancellation
     }
-    // Total extraction failure
+    // Total extraction failure (including our own 8-second timeout)
     return { status: 'manual', domain };
   }
 }

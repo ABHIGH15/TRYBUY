@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "TRYBUY Capture Spike",
+  "version": "0.1.0",
+  "description": "Stateless P1 capture spike for TRYBUY. Extracts product details from the active tab and hands off to the local app.",
+  "action": {
+    "default_title": "Save to TRYBUY"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ]
+}
