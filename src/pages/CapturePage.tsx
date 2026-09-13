@@ -196,8 +196,9 @@ export function CapturePage() {
     // Handle comparison set association
     if (reason === 'comparing') {
       let finalSetId = selectedSetId;
+      const actuallyCreatingSet = isCreatingSet || Object.keys(comparisonSets).length === 0;
       
-      if (isCreatingSet && newSetName.trim()) {
+      if (actuallyCreatingSet && newSetName.trim()) {
         const newSet = domainCreateComparisonSet(newSetName.trim());
         createComparisonSet(newSet);
         finalSetId = newSet.id;
@@ -211,9 +212,9 @@ export function CapturePage() {
       if (finalSetId) {
         addToComparisonSet(finalSetId, decision.id);
         
-        // Only track item_added if we didn't just create it (to avoid duplicate counting conceptually, though spec is loose here. Let's just track added).
+        // Only track item_added if we didn't just create it
         const updatedSet = useDecisionStore.getState().comparisonSets[finalSetId];
-        if (!isCreatingSet) {
+        if (!actuallyCreatingSet) {
           analytics.track('comparison_item_added', {
             set_id: finalSetId,
             item_count_after: updatedSet?.decision_ids.length || 1
@@ -234,8 +235,12 @@ export function CapturePage() {
 
   const isSaveEnabled = () => {
     if (!reason) return false;
-    if (reason === 'comparing' && isCreatingSet && !newSetName.trim()) return false;
-    if (reason === 'comparing' && !isCreatingSet && !selectedSetId) return false;
+    
+    const actuallyCreatingSet = isCreatingSet || Object.keys(comparisonSets).length === 0;
+    
+    if (reason === 'comparing' && actuallyCreatingSet && !newSetName.trim()) return false;
+    if (reason === 'comparing' && !actuallyCreatingSet && !selectedSetId) return false;
+    
     // We don't block on empty title/price because extraction failure shouldn't block saving (per spec).
     // We'll use defaults like 'Unknown Product' if they are left blank.
     return true;
