@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { Store, Check, X, ArrowLeftRight, Moon, Search, Wallet, ChevronRight } from 'lucide-react';
 import type { Decision, ComparisonSet } from '../../types/domain';
 import { useComparisonSetItems } from '../../hooks/useDashboard';
-import { formatPrice } from '../../utils/format';
 
 function ReasonBadge({ reason }: { reason: 'comparing' | 'waiting_for_price' }) {
   const isComparing = reason === 'comparing';
