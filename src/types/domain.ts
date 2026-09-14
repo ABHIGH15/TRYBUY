@@ -30,6 +30,7 @@ export interface Decision {
   
   extraction_status: ExtractionStatus;
   created_at: number;
+  is_example?: boolean;
   updated_at: number;
   resolved_at?: number;
 }
@@ -39,6 +40,7 @@ export interface ComparisonSet {
   name: string;
   decision_ids: string[];
   created_at: number;
+  is_example?: boolean;
 }
 
 export function generateId(): string {
@@ -92,6 +94,7 @@ export function validateDecision(obj: any): Decision | null {
   if (typeof obj.updated_at !== 'number') return null;
   if (obj.resolved_at !== undefined && typeof obj.resolved_at !== 'number') return null;
   
+  if (obj.is_example) (obj as Decision).is_example = true;
   return obj as Decision;
 }
 
@@ -101,5 +104,6 @@ export function validateComparisonSet(obj: any): ComparisonSet | null {
   if (typeof obj.name !== 'string') return null;
   if (!Array.isArray(obj.decision_ids)) return null;
   if (typeof obj.created_at !== 'number') return null;
+  if (obj.is_example) (obj as ComparisonSet).is_example = true;
   return obj as ComparisonSet;
 }

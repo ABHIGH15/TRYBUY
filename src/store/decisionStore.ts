@@ -31,6 +31,9 @@ interface DecisionState {
   
   recheckPrice: (id: string, newPrice: number) => void;
   markUnreachable: (id: string) => void;
+  
+  seedExamples: () => void;
+  clearExamples: () => void;
 }
 
 export const useDecisionStore = create<DecisionState>()(
@@ -39,9 +42,78 @@ export const useDecisionStore = create<DecisionState>()(
       decisions: {},
       comparisonSets: {},
 
-      addDecision: (decision) => set((state) => ({
-        decisions: { ...state.decisions, [decision.id]: decision }
-      })),
+      addDecision: (decision) => set((state) => {
+        // Automatically clear examples on first real save
+        const newDecisions = { ...state.decisions };
+        const newSets = { ...state.comparisonSets };
+        
+        let hasExamples = false;
+        Object.values(newDecisions).forEach(d => {
+          if (d.is_example) {
+            hasExamples = true;
+            delete newDecisions[d.id];
+          }
+        });
+        Object.values(newSets).forEach(s => {
+          if (s.is_example) delete newSets[s.id];
+        });
+
+        newDecisions[decision.id] = decision;
+        
+        return { 
+          decisions: newDecisions,
+          comparisonSets: hasExamples ? newSets : state.comparisonSets 
+        };
+      }),
+
+      clearExamples: () => set((state) => {
+        const newDecisions = { ...state.decisions };
+        const newSets = { ...state.comparisonSets };
+        Object.values(newDecisions).forEach(d => { if (d.is_example) delete newDecisions[d.id]; });
+        Object.values(newSets).forEach(s => { if (s.is_example) delete newSets[s.id]; });
+        return { decisions: newDecisions, comparisonSets: newSets };
+      }),
+
+      seedExamples: () => set((state) => {
+        const now = Date.now();
+        const compSetId = 'example-set-1';
+        
+        const dummySet = {
+          id: compSetId,
+          name: 'Running Shoes',
+          decision_ids: ['ex-1', 'ex-2'],
+          created_at: now - 86400000 * 2,
+          is_example: true
+        };
+
+        const dummyDecisions = {
+          'ex-1': {
+            id: 'ex-1', reason: 'comparing' as const, state: 'active' as const, resolution_type: null,
+            unreachable: false, product: { title: 'Nike Pegasus 40', merchant: 'Nike', price_at_save: 10495, currency: 'INR', image_url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=200', source_url: 'https://example.com' },
+            comparison_set_id: compSetId, extraction_status: 'auto' as const, created_at: now - 86400000 * 2, updated_at: now - 86400000 * 2, is_example: true
+          },
+          'ex-2': {
+            id: 'ex-2', reason: 'comparing' as const, state: 'active' as const, resolution_type: null,
+            unreachable: false, product: { title: 'Asics Novablast 3', merchant: 'Asics', price_at_save: 11999, currency: 'INR', image_url: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&q=80&w=200', source_url: 'https://example.com' },
+            comparison_set_id: compSetId, extraction_status: 'auto' as const, created_at: now - 86400000 * 2, updated_at: now - 86400000 * 2, is_example: true
+          },
+          'ex-3': {
+            id: 'ex-3', reason: 'waiting_for_price' as const, state: 'active' as const, resolution_type: null,
+            unreachable: false, product: { title: 'Sony WH-1000XM5', merchant: 'Amazon', price_at_save: 29990, currency: 'INR', image_url: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&q=80&w=200', source_url: 'https://example.com' },
+            current_price: 24990, target_price: 25000, extraction_status: 'auto' as const, created_at: now - 86400000 * 5, updated_at: now, is_example: true
+          },
+          'ex-4': {
+            id: 'ex-4', reason: 'waiting_for_price' as const, state: 'resolved' as const, resolution_type: 'bought' as const,
+            unreachable: false, product: { title: 'Aer City Pack', merchant: 'Aer', price_at_save: 14900, currency: 'INR', image_url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=200', source_url: 'https://example.com' },
+            current_price: 12900, target_price: 13000, extraction_status: 'auto' as const, created_at: now - 86400000 * 10, updated_at: now - 86400000 * 1, resolved_at: now - 86400000 * 1, is_example: true
+          }
+        };
+
+        return {
+          decisions: { ...state.decisions, ...dummyDecisions },
+          comparisonSets: { ...state.comparisonSets, [compSetId]: dummySet }
+        };
+      }),
 
       updateDecisionReason: (id, reason) => set((state) => {
         const decision = state.decisions[id];

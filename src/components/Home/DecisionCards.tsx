@@ -40,7 +40,7 @@ export function ComparisonSetCard({ set, isTriggered }: { set: ComparisonSet; is
           </div>
           <div>
             <div className="text-[15px] font-medium text-ink">{set.name}</div>
-            <ReasonBadge reason="comparing" />
+            <ReasonBadge reason="comparing" /> {set.is_example && <span className="ml-2 text-[10px] uppercase font-bold text-gray-400 border border-gray-200 px-1.5 py-0.5 rounded">Example</span>}
           </div>
         </div>
         <div className="mt-1 text-[13px] text-closed">
@@ -77,7 +77,7 @@ export function PriceDecisionCard({ decision, isTriggered }: { decision: Decisio
           )}
           <div>
             <div className="text-[15px] font-medium text-ink truncate max-w-[200px]">{product.title}</div>
-            <ReasonBadge reason="waiting_for_price" />
+            <ReasonBadge reason="waiting_for_price" /> {decision.is_example && <span className="ml-2 text-[10px] uppercase font-bold text-gray-400 border border-gray-200 px-1.5 py-0.5 rounded">Example</span>}
           </div>
         </div>
         <div className="mt-1 text-[13px] text-closed">
@@ -125,7 +125,7 @@ export function ResolvedDecisionCard({ decision }: { decision: Decision }) {
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <div className="text-[14px] text-ink truncate">{product.title}</div>
+        <div className="flex items-center gap-2"><div className="text-[14px] text-ink truncate max-w-[200px]">{product.title}</div>{decision.is_example && <span className="text-[10px] uppercase font-bold text-gray-400 border border-gray-200 px-1.5 py-0.5 rounded shrink-0">Example</span>}</div>
       </div>
       <span className="inline-flex items-center gap-1.5 text-[13px] text-closed">
         <Icon size={13} strokeWidth={2.25} />

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
+import { useDecisionStore } from "../store/decisionStore";
 import { useDashboard } from '../hooks/useDashboard';
 import { ComparisonSetCard, PriceDecisionCard, ResolvedDecisionCard } from '../components/Home/DecisionCards';
 import type { Decision, ComparisonSet } from '../types/domain';
@@ -17,12 +18,13 @@ export function HomePage() {
     });
   }, [dashboard.totalOpenDecisionsCount, dashboard.triggerCount]);
 
+  const hasExamples = Object.values(useDecisionStore(s => s.decisions)).some(d => d.is_example);
   const hasEmptyState = dashboard.totalOpenDecisionsCount === 0;
 
   return (
     <div className="min-h-screen bg-paper pb-24">
       <header className="px-6 pt-10 pb-6  border-b border-line sticky top-0 z-10">
-        <h1 className="text-2xl font-medium font-display tracking-tight text-ink">Your open decisions</h1>
+        <div className="flex justify-between items-start"><h1 className="text-2xl font-medium font-display tracking-tight text-ink">Your open decisions</h1> {hasExamples && <button onClick={() => useDecisionStore.getState().clearExamples()} className="text-xs text-amber font-medium px-3 py-1 bg-amber-bg rounded-full hover:opacity-80">Clear Examples</button>} </div>
         {!hasEmptyState && dashboard.triggerCount > 0 && (
           <p className="text-sm font-medium text-amber mt-1">
             {dashboard.triggerCount} {dashboard.triggerCount === 1 ? 'decision needs' : 'decisions need'} attention
@@ -43,12 +45,20 @@ export function HomePage() {
             <p className="text-sm text-closed mb-8 max-w-[250px] mx-auto">
               Found something you like but aren't ready to buy? Paste its link and TRYBUY will remember what you're waiting for.
             </p>
-            <button
-              onClick={() => navigate('/capture')}
-              className="bg-ink text-white px-6 py-3 rounded-full font-semibold shadow-sm hover:bg-gray-800 transition-colors"
-            >
-              Bring in a product
-            </button>
+            <div className="flex flex-col gap-3 max-w-[200px] mx-auto">
+              <button
+                onClick={() => navigate('/capture')}
+                className="bg-ink text-paper px-6 py-3 rounded-full font-semibold shadow-sm hover:opacity-90 transition-opacity"
+              >
+                Bring in a product
+              </button>
+              <button
+                onClick={() => useDecisionStore.getState().seedExamples()}
+                className="text-closed text-sm hover:text-ink transition-colors font-medium"
+              >
+                Or view examples
+              </button>
+            </div>
           </div>
         ) : (
           <>

@@ -1,6 +1,6 @@
 const TRYBUY_CONFIG = {
   // Update this to your deployed app URL (e.g., https://trybuy-app.vercel.app)
-  APP_URL: 'https://trybuy-mvp.vercel.app'
+  APP_URL: 'https://trybuy.vercel.app'
 };
 
 (function() {

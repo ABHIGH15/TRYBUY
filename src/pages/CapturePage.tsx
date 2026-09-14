@@ -323,6 +323,13 @@ export function CapturePage() {
                   </button>
                   <button 
                     type="button"
+                    onClick={() => navigate('/tools')}
+                    className="w-full bg-blue-50 text-blue-700 py-3 rounded-xl font-medium shadow-sm hover:bg-blue-100 transition-colors flex justify-center items-center gap-2"
+                  >
+                    No extension? Get the Bookmarklet
+                  </button>
+                  <button 
+                    type="button"
                     onClick={() => setStep('editing')}
                     className="w-full bg-white text-gray-600 border border-gray-200 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors"
                   >
@@ -448,7 +455,7 @@ export function CapturePage() {
                             </option>
                           ))}
                         </select>
-                        <button 
+                  <button 
                           type="button"
                           onClick={() => setIsCreatingSet(true)}
                           className="text-sm text-gray-500 font-medium flex items-center gap-1 mt-2 hover:text-black transition-colors"
@@ -469,7 +476,7 @@ export function CapturePage() {
                           className="w-full p-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-1 focus:ring-black outline-none"
                         />
                         {Object.keys(comparisonSets).length > 0 && (
-                          <button 
+                  <button 
                             type="button"
                             onClick={() => setIsCreatingSet(false)}
                             className="text-sm text-gray-500 font-medium mt-2 hover:text-black transition-colors"
