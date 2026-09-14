@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toast } from './components/Toast';
 import { CapturePage } from './pages/CapturePage';
 import { ToolsPage } from './pages/ToolsPage';
+import { AboutPage } from './pages/AboutPage';
 import { HomePage } from './pages/HomePage';
 import { HistoryPage } from './pages/HistoryPage';
 import { ComparisonPage } from './pages/ComparisonPage';
@@ -15,6 +16,7 @@ function AppContent() {
         <Route path="/" element={<HomePage />} />
         <Route path="/capture" element={<CapturePage />} />
         <Route path="/tools" element={<ToolsPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/comparison/:setId" element={<ComparisonPage />} />
         <Route path="/price/:decisionId" element={<PriceDetailPage />} />

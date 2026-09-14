@@ -71,7 +71,7 @@ export function ToolsPage() {
           </p>
 
           <div className="bg-closed-bg p-4 rounded-xl border border-line mb-8 text-sm text-ink font-medium">
-            Drag the button below into your browser's bookmarks bar.
+            Drag the button below into your browser's bookmarks bar, or right-click it and choose "Bookmark this link".
           </div>
 
           <a 

@@ -183,6 +183,7 @@ export function ComparisonPage() {
       </header>
 
       <main className="p-6">
+        <p className="text-xs text-gray-500 mb-6 uppercase tracking-wider text-center">TRYBUY doesn't rank these for you — you decide</p>
         <div className="flex overflow-x-auto gap-4 pb-6 snap-x -mx-6 px-6 hide-scrollbar">
           {activeItems.map(item => (
             <div key={item.id} className="w-[85vw] max-w-[300px] flex-shrink-0 snap-center bg-paper-raised rounded-2xl border border-line shadow-sm overflow-hidden flex flex-col">

@@ -23,8 +23,20 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-paper pb-24">
-      <header className="px-6 pt-10 pb-6  border-b border-line sticky top-0 z-10">
-        <div className="flex justify-between items-start"><h1 className="text-2xl font-medium font-display tracking-tight text-ink">Your open decisions</h1> {hasExamples && <button onClick={() => useDecisionStore.getState().clearExamples()} className="text-xs text-amber font-medium px-3 py-1 bg-amber-bg rounded-full hover:opacity-80">Clear Examples</button>} </div>
+      <header className="px-6 pt-10 pb-6 border-b border-line sticky top-0 z-10 bg-paper">
+        <div className="flex justify-between items-start">
+          <h1 className="text-2xl font-medium font-display tracking-tight text-ink">Your open decisions</h1>
+          <div className="flex gap-2">
+            {hasExamples && (
+              <button onClick={() => useDecisionStore.getState().clearExamples()} className="text-xs text-amber font-medium px-3 py-1 bg-amber-bg rounded-full hover:opacity-80">
+                Clear Examples
+              </button>
+            )}
+            <button onClick={() => { if(window.confirm('Reset the entire store to a fresh demo state?')) useDecisionStore.getState().resetDemo(); }} className="text-xs text-closed font-medium px-3 py-1 bg-closed-bg border border-line rounded-full hover:text-ink">
+              Reset Demo
+            </button>
+          </div>
+        </div>
         {!hasEmptyState && dashboard.triggerCount > 0 && (
           <p className="text-sm font-medium text-amber mt-1">
             {dashboard.triggerCount} {dashboard.triggerCount === 1 ? 'decision needs' : 'decisions need'} attention
@@ -38,12 +50,12 @@ export function HomePage() {
       <main className="px-6 py-8 space-y-12">
         {hasEmptyState ? (
           <div className="text-center py-16 px-4">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-closed-bg rounded-full flex items-center justify-center mx-auto mb-6">
               <Plus className="w-8 h-8 text-closed" />
             </div>
             <h2 className="text-xl font-medium font-display text-ink mb-2">No open decisions yet.</h2>
             <p className="text-sm text-closed mb-8 max-w-[250px] mx-auto">
-              Found something you like but aren't ready to buy? Paste its link and TRYBUY will remember what you're waiting for.
+              Most saved products just sit there. TRYBUY remembers why you paused — and helps you actually finish the decision.
             </p>
             <div className="flex flex-col gap-3 max-w-[200px] mx-auto">
               <button
@@ -123,6 +135,11 @@ export function HomePage() {
           </>
         )}
       </main>
+      <footer className="px-6 py-12 text-center">
+        <button onClick={() => navigate('/about')} className="text-sm font-medium text-closed hover:text-ink transition-colors">
+          Read the Case Study
+        </button>
+      </footer>
     </div>
   );
 }

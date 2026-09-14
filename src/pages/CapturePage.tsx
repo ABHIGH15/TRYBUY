@@ -422,6 +422,9 @@ export function CapturePage() {
 
             <section className="space-y-4">
               <h2 className="text-xl font-bold text-gray-900">What are you waiting for?</h2>
+              <p className="text-xs text-gray-500 mt-1 mb-4 leading-relaxed">
+                Your answer changes what TRYBUY does next: comparing gets a side-by-side, price-watch gets tracked automatically.
+              </p>
               
               <div className="space-y-3">
                 <label className={`block p-4 rounded-xl border-2 cursor-pointer transition-colors ${reason === 'comparing' ? 'border-black bg-gray-50' : 'border-gray-100 bg-white hover:border-gray-200'}`}>

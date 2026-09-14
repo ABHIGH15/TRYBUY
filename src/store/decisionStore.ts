@@ -34,6 +34,7 @@ interface DecisionState {
   
   seedExamples: () => void;
   clearExamples: () => void;
+  resetDemo: () => void;
 }
 
 export const useDecisionStore = create<DecisionState>()(
@@ -73,6 +74,11 @@ export const useDecisionStore = create<DecisionState>()(
         Object.values(newSets).forEach(s => { if (s.is_example) delete newSets[s.id]; });
         return { decisions: newDecisions, comparisonSets: newSets };
       }),
+
+      resetDemo: () => {
+        set({ decisions: {}, comparisonSets: {} });
+        useDecisionStore.getState().seedExamples();
+      },
 
       seedExamples: () => set((state) => {
         const now = Date.now();
