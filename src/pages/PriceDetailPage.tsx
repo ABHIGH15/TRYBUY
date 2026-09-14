@@ -21,8 +21,8 @@ export function PriceDetailPage() {
   if (!decision || decision.reason !== 'waiting_for_price') {
     return (
       <div className="p-8 text-center">
-        <p className="text-gray-500">Price decision not found.</p>
-        <button onClick={() => navigate('/')} className="mt-4 text-black underline font-bold">Go Home</button>
+        <p className="text-closed">Price decision not found.</p>
+        <button onClick={() => navigate('/')} className="mt-4 text-black underline font-medium font-display">Go Home</button>
       </div>
     );
   }
@@ -63,6 +63,8 @@ export function PriceDetailPage() {
   };
 
   const handleResolve = (type: ResolutionType | 'dormant') => {
+    if (!window.confirm(`Mark this decision as ${type}?`)) return;
+    
     if (type === 'dormant') {
       markDormant(decision.id); // Dormant doesn't take note currently in store
     } else {
@@ -106,10 +108,10 @@ export function PriceDetailPage() {
 
   if (state !== 'active') {
     return (
-      <div className="p-8 text-center min-h-screen flex flex-col items-center justify-center bg-gray-50">
+      <div className="p-8 text-center min-h-screen flex flex-col items-center justify-center bg-paper">
         <Archive className="w-12 h-12 text-gray-400 mb-4" />
-        <h2 className="text-xl font-bold text-gray-900 mb-2">This decision is resolved.</h2>
-        <button onClick={() => navigate('/')} className="bg-black text-white px-6 py-2 rounded-full font-bold shadow-md">
+        <h2 className="text-xl font-medium font-display text-ink mb-2">This decision is resolved.</h2>
+        <button onClick={() => navigate('/')} className="bg-ink text-paper px-6 py-2 rounded-full font-medium font-display shadow-md">
           Return Home
         </button>
       </div>
@@ -120,26 +122,26 @@ export function PriceDetailPage() {
   const displayPrice = current_price !== undefined ? current_price : product.price_at_save;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <header className="px-6 py-4 bg-white border-b border-gray-100 flex items-center justify-between sticky top-0 z-20">
+    <div className="min-h-screen bg-paper pb-24">
+      <header className="px-6 py-4 bg-paper-raised border-b border-line flex items-center justify-between sticky top-0 z-20">
         <button 
           onClick={() => navigate('/')} 
           aria-label="Go back"
-          className="p-2 -ml-2 rounded-full hover:bg-gray-100 focus:ring-2 focus:ring-black outline-none flex-shrink-0 transition-colors"
+          className="p-2 -ml-2 rounded-full hover:bg-closed-bg focus:ring-2 focus:ring-black outline-none flex-shrink-0 transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-900" />
+          <ArrowLeft className="w-5 h-5 text-ink" />
         </button>
-        <span className="font-bold text-gray-900 uppercase tracking-wider text-xs">Price Watch</span>
+        <span className="font-medium font-display text-ink uppercase tracking-wider text-xs">Price Watch</span>
         <div className="w-9" /> {/* Spacer */}
       </header>
 
       <main className="p-6">
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-8">
-          <div className="aspect-[4/3] bg-gray-100 relative">
+        <div className="bg-paper-raised rounded-2xl border border-line shadow-sm overflow-hidden mb-8">
+          <div className="aspect-[4/3] bg-closed-bg relative">
             {product.image_url ? (
               <img src={product.image_url} alt={product.title} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-500">
+              <div className="w-full h-full flex items-center justify-center text-closed">
                 <span className="text-sm font-medium">No Image</span>
               </div>
             )}
@@ -148,7 +150,7 @@ export function PriceDetailPage() {
               target="_blank" 
               rel="noopener noreferrer"
               aria-label="Open original product page"
-              className="absolute top-3 right-3 bg-white/90 backdrop-blur text-black p-2 rounded-full shadow hover:bg-white focus:ring-2 focus:ring-black outline-none transition-colors"
+              className="absolute top-3 right-3 bg-paper-raised/90 backdrop-blur text-black p-2 rounded-full shadow hover:bg-paper-raised focus:ring-2 focus:ring-black outline-none transition-colors"
             >
               <ExternalLink className="w-4 h-4" />
             </a>
@@ -160,7 +162,7 @@ export function PriceDetailPage() {
                     markUnreachable(decision.id);
                   }
                 }}
-                className="absolute top-3 left-3 bg-white/90 backdrop-blur text-red-600 px-3 py-1.5 rounded-full shadow hover:bg-white text-xs font-bold flex items-center gap-1"
+                className="absolute top-3 left-3 bg-paper-raised/90 backdrop-blur text-red-600 px-3 py-1.5 rounded-full shadow hover:bg-paper-raised text-xs font-medium font-display flex items-center gap-1"
               >
                 <AlertTriangle className="w-3 h-3" /> Mark broken
               </button>
@@ -168,32 +170,32 @@ export function PriceDetailPage() {
           </div>
           
           <div className="p-5">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">{product.merchant}</p>
-            <h1 className="font-bold text-gray-900 text-xl mb-6">{product.title}</h1>
+            <p className="text-xs font-medium font-display text-closed uppercase tracking-wider mb-1">{product.merchant}</p>
+            <h1 className="font-medium font-display text-ink text-xl mb-6">{product.title}</h1>
             
             {unreachable ? (
               <div className="bg-red-50 text-red-700 p-4 rounded-xl flex items-start gap-3 mb-6">
                 <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <span className="font-bold block mb-1">Source unreachable</span>
+                  <span className="font-medium font-display block mb-1">Source unreachable</span>
                   We couldn't connect to the retailer's page to verify the price.
                 </div>
               </div>
             ) : (
-              <div className="flex items-end justify-between mb-6 bg-gray-50 p-4 rounded-xl">
+              <div className="flex items-end justify-between mb-6 bg-paper p-4 rounded-xl">
                 <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase mb-1">Current Price</p>
+                  <p className="text-xs font-medium font-display text-closed uppercase mb-1">Current Price</p>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-black text-black">{formatPrice(displayPrice, product.currency)}</span>
                     {priceDrop && product.price_at_save !== undefined && (
-                      <span className="text-sm font-bold text-gray-500 line-through">{formatPrice(product.price_at_save, product.currency)}</span>
+                      <span className="text-sm font-medium font-display text-closed line-through">{formatPrice(product.price_at_save, product.currency)}</span>
                     )}
                   </div>
                 </div>
                 {target_price !== undefined && (
                   <div className="text-right">
-                    <p className="text-xs font-bold text-gray-500 uppercase mb-1">Target</p>
-                    <span className="text-lg font-bold text-black">{formatPrice(target_price, product.currency)}</span>
+                    <p className="text-xs font-medium font-display text-closed uppercase mb-1">Target</p>
+                    <span className="text-lg font-medium font-display text-black">{formatPrice(target_price, product.currency)}</span>
                   </div>
                 )}
               </div>
@@ -202,7 +204,7 @@ export function PriceDetailPage() {
             <button
               onClick={handleRecheck}
               disabled={isChecking}
-              className="w-full bg-white border border-gray-200 text-gray-900 py-3 rounded-xl font-bold shadow-sm hover:bg-gray-50 disabled:opacity-50 transition-colors flex justify-center items-center gap-2"
+              className="w-full bg-paper-raised border border-line text-ink py-3 rounded-xl font-medium font-display shadow-sm hover:bg-paper disabled:opacity-50 transition-colors flex justify-center items-center gap-2"
             >
               <RefreshCw className={`w-4 h-4 ${isChecking ? 'animate-spin' : ''}`} /> 
               {isChecking ? 'Checking...' : 'Recheck price now'}
@@ -214,36 +216,36 @@ export function PriceDetailPage() {
         </div>
 
         <section>
-          <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Resolve this decision</h2>
+          <h2 className="text-sm font-medium font-display text-ink uppercase tracking-wider mb-4">Resolve this decision</h2>
           <input 
             type="text" 
             placeholder="Add a note (optional)..."
             value={note}
             onChange={e => setNote(e.target.value)}
-            className="w-full mb-4 px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-black"
+            className="w-full mb-4 px-4 py-3 bg-paper-raised border border-line rounded-xl text-sm outline-none focus:border-black"
           />
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => handleResolve('bought')}
-              className="bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 p-4 rounded-xl font-bold text-sm flex flex-col items-center gap-2 transition-colors"
+              className="bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 p-4 rounded-xl font-medium font-display text-sm flex flex-col items-center gap-2 transition-colors"
             >
               <CheckCircle2 className="w-6 h-6" /> Bought
             </button>
             <button
               onClick={() => handleResolve('replaced')}
-              className="bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 p-4 rounded-xl font-bold text-sm flex flex-col items-center gap-2 transition-colors"
+              className="bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 p-4 rounded-xl font-medium font-display text-sm flex flex-col items-center gap-2 transition-colors"
             >
               <ArrowRightLeft className="w-6 h-6" /> Bought Alternative
             </button>
             <button
               onClick={() => handleResolve('declined')}
-              className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 p-4 rounded-xl font-bold text-sm flex flex-col items-center gap-2 transition-colors"
+              className="bg-paper-raised hover:bg-paper border border-line text-gray-700 p-4 rounded-xl font-medium font-display text-sm flex flex-col items-center gap-2 transition-colors"
             >
               <XCircle className="w-6 h-6" /> Decided Against
             </button>
             <button
               onClick={() => handleResolve('dormant')}
-              className="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 p-4 rounded-xl font-bold text-sm flex flex-col items-center gap-2 transition-colors"
+              className="bg-paper-raised hover:bg-paper border border-line text-gray-700 p-4 rounded-xl font-medium font-display text-sm flex flex-col items-center gap-2 transition-colors"
             >
               <Archive className="w-6 h-6" /> Dormant
             </button>
